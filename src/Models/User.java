@@ -79,7 +79,25 @@ public class User {
         BankAccountNo = bankAccountNo;
     }
 
-
+    public static User fromResultSet(ResultSet result) throws SQLException {
+        if (result.next()) {
+            try {
+                User current = new User();
+                current.SSN = result.getInt("SSN");
+                current.FirstName = result.getString("FirstName");
+                current.LastName = result.getString("LastName");
+                current.PhoneNumber = result.getString("PhoneNumber");
+                current.BankAccountNo = result.getString("BankAccountNo");
+                current.Role = Roles.valueOf(result.getString("Role"));
+                return  current;
+            } catch (SQLException ex) {
+                Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        return null;
+    }
+    
     public static User login(int ssn, String password) throws InvalidFormException {
         try {
             String hashed_pass = DBController.hash_md5(password);
@@ -111,6 +129,6 @@ public class User {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        return new User();
+        return null;
     }
 }

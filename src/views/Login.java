@@ -6,6 +6,7 @@ package views;
 
 import Controllers.DBController;
 import Exceptions.InvalidFormException;
+import Models.Admin;
 import Models.Agent;
 import Models.Roles;
 import Models.User;
@@ -234,6 +235,9 @@ public class Login extends javax.swing.JFrame {
                 Agent currentAgent = Agent.fromUser(current);
                 this.dispose();
                 new AgentDashboard(currentAgent).setVisible(true);
+            } else if (current.Role == Roles.ADMIN) {
+                this.dispose();
+                new AdminDashboard(Admin.fromUser(current)).setVisible(true);
             }
             
         }catch(InvalidFormException e) {

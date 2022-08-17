@@ -4,7 +4,9 @@
  */
 package views;
 
+import Controllers.DBController;
 import Models.Agent;
+import Models.User;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -12,6 +14,8 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -26,6 +30,10 @@ import javax.swing.LayoutStyle;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.proteanit.sql.DbUtils;
 
 /**
  *
@@ -45,12 +53,12 @@ public class AgentDashboard extends javax.swing.JFrame {
     public static void setCurrentAgent(Agent currentAgent) {
         AgentDashboard.currentAgent = currentAgent;
     }
-    
+
     public AgentDashboard(Agent current) {
         this.currentAgent = current;
         initComponents();
         Dimension scren = Toolkit.getDefaultToolkit().getScreenSize();
-        this.setLocation(scren.width/2 - this.getWidth()/2, scren.height/2 - this.getHeight()/2);
+        this.setLocation(scren.width / 2 - this.getWidth() / 2, scren.height / 2 - this.getHeight() / 2);
         nameDisplay.setText(currentAgent.FirstName + " " + currentAgent.LastName);
     }
 
@@ -73,16 +81,12 @@ public class AgentDashboard extends javax.swing.JFrame {
         userTab = new JPanel();
         jPanel5 = new JPanel();
         searchBtn = new JButton();
-        jComboBox1 = new JComboBox<>();
-        jTextField1 = new JTextField();
+        searchColumn = new JComboBox<>();
+        keyword = new JTextField();
         jScrollPane1 = new JScrollPane();
         userListTable = new JScrollPane();
-        jTable1 = new JTable();
-        jPanel6 = new JPanel();
+        searchResultTable = new JTable();
         addBtn = new JButton();
-        editBtn = new JButton();
-        deleteBtn = new JButton();
-        viewProfileBtn = new JButton();
         travelTab = new JPanel();
         jButton1 = new JButton();
         jButton2 = new JButton();
@@ -151,44 +155,27 @@ public class AgentDashboard extends javax.swing.JFrame {
             }
         });
 
-        jComboBox1.setModel(new DefaultComboBoxModel<>(new String[] { "SSN", "Name", "Phone Number" }));
+        searchColumn.setModel(new DefaultComboBoxModel<>(new String[] { "SSN", "Name", "Phone Number" }));
 
-        jTable1.setModel(new DefaultTableModel(
+        searchResultTable.setModel(new DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {},
+                {},
+                {},
+                {}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+
             }
         ));
-        userListTable.setViewportView(jTable1);
+        searchResultTable.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                showProfile(evt);
+            }
+        });
+        userListTable.setViewportView(searchResultTable);
 
         jScrollPane1.setViewportView(userListTable);
-
-        GroupLayout jPanel5Layout = new GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(jPanel5Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addComponent(jComboBox1, GroupLayout.PREFERRED_SIZE, 131, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField1)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(searchBtn, GroupLayout.PREFERRED_SIZE, 148, GroupLayout.PREFERRED_SIZE))
-            .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 629, Short.MAX_VALUE)
-        );
-        jPanel5Layout.setVerticalGroup(jPanel5Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                .addGap(0, 4, Short.MAX_VALUE)
-                .addGroup(jPanel5Layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                    .addComponent(searchBtn, GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE)
-                    .addComponent(jComboBox1)
-                    .addComponent(jTextField1))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-        );
 
         addBtn.setText("Add New User");
         addBtn.addActionListener(new ActionListener() {
@@ -197,34 +184,33 @@ public class AgentDashboard extends javax.swing.JFrame {
             }
         });
 
-        editBtn.setText("Edit User");
-        editBtn.setEnabled(false);
-
-        deleteBtn.setText("Delete User");
-        deleteBtn.setEnabled(false);
-
-        viewProfileBtn.setText("View Full Information");
-        viewProfileBtn.setEnabled(false);
-
-        GroupLayout jPanel6Layout = new GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(jPanel6Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addComponent(editBtn, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(addBtn, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(deleteBtn, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(viewProfileBtn, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        GroupLayout jPanel5Layout = new GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(jPanel5Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addComponent(searchColumn, GroupLayout.PREFERRED_SIZE, 131, GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(keyword)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(searchBtn, GroupLayout.PREFERRED_SIZE, 148, GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(addBtn, GroupLayout.PREFERRED_SIZE, 138, GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 800, GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 7, Short.MAX_VALUE))
         );
-        jPanel6Layout.setVerticalGroup(jPanel6Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(addBtn, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(editBtn, GroupLayout.PREFERRED_SIZE, 37, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(deleteBtn, GroupLayout.PREFERRED_SIZE, 39, GroupLayout.PREFERRED_SIZE)
-                .addGap(39, 39, 39)
-                .addComponent(viewProfileBtn, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        jPanel5Layout.setVerticalGroup(jPanel5Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            .addGroup(GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                .addContainerGap(29, Short.MAX_VALUE)
+                .addGroup(jPanel5Layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel5Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(searchBtn, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(addBtn, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE))
+                    .addComponent(searchColumn)
+                    .addComponent(keyword))
+                .addGap(17, 17, 17)
+                .addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
         );
 
         GroupLayout userTabLayout = new GroupLayout(userTab);
@@ -233,8 +219,6 @@ public class AgentDashboard extends javax.swing.JFrame {
             .addGroup(userTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel5, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel6, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         userTabLayout.setVerticalGroup(userTabLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -242,7 +226,6 @@ public class AgentDashboard extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jPanel5, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
-            .addComponent(jPanel6, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab("Manage Users", userTab);
@@ -251,6 +234,11 @@ public class AgentDashboard extends javax.swing.JFrame {
         jButton1.setActionCommand("");
 
         jButton2.setText("Add Travel");
+        jButton2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("View Recent Travel Histories");
 
@@ -273,7 +261,7 @@ public class AgentDashboard extends javax.swing.JFrame {
                 .addComponent(jButton1, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jButton3, GroupLayout.PREFERRED_SIZE, 49, GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(272, Short.MAX_VALUE))
+                .addContainerGap(273, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Manage Travels", travelTab);
@@ -299,8 +287,8 @@ public class AgentDashboard extends javax.swing.JFrame {
             .addComponent(jPanel1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addGap(21, 21, 21)
-                .addComponent(jPanel3, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addComponent(jPanel3, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(24, 24, 24))
         );
         layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
@@ -313,50 +301,108 @@ public class AgentDashboard extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+     private void loadusers() {
+        try {
+            String sql = "SELECT SSN, FirstName, LastName, PhoneNumber, Role From User WHERE Role='DRIVER' OR Role='PASSENGER'";
+            PreparedStatement ps = DBController.getPreparedStmt(sql);
+            ResultSet rs = ps.executeQuery();
+            searchResultTable.setModel(DbUtils.resultSetToTableModel(rs));
+        } catch (SQLException ex) {
+            Logger.getLogger(AdminDashboard.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+     
     private void addBtnActionPerformed(ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
         // TODO add your handling code here:
-        this.dispose();
-        AddUserDialog addUserDialog =  new AddUserDialog(currentAgent);
-        addUserDialog.setLocation(this.getX(), this.getY());
+        AddUserDialog addUserDialog = new AddUserDialog(this, currentAgent);
         addUserDialog.setVisible(true);
-        
+
     }//GEN-LAST:event_addBtnActionPerformed
 
     private void searchBtnActionPerformed(ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
-        
+        String colName = (String) searchColumn.getSelectedItem();
+        String sql;
+        PreparedStatement ps;
+        try {
+            if (colName == "SSN") {
+                sql = "SELECT SSN, FirstName, LastName, PhoneNumber, Role From User WHERE Role='DRIVER' OR Role='PASSENGER' AND SSN=?";
+                ps = DBController.getPreparedStmt(sql);
+                ps.setInt(1, Integer.parseInt(keyword.getText()));
+                ResultSet rs = ps.executeQuery();
+                searchResultTable.setModel(DbUtils.resultSetToTableModel(rs));
+
+            } else if (colName == "Name") {
+                String name = keyword.getText();
+                sql = "SELECT SSN, FirstName, LastName, PhoneNumber, Role From User WHERE Role='DRIVER' OR Role='PASSENGER' AND FirstName LIKE ? ";
+                ps = DBController.getPreparedStmt(sql);
+                ps.setString(1, name + "%");
+                ResultSet rs = ps.executeQuery();
+                searchResultTable.setModel(DbUtils.resultSetToTableModel(rs));
+            } else if (colName == "Phone Number") {
+                sql = "SELECT SSN, FirstName, LastName, PhoneNumber, Role From User WHERE Role='DRIVER' OR Role='PASSENGER' AND PhoneNumber=?";
+                ps = DBController.getPreparedStmt(sql);
+                ps.setString(1, keyword.getText());
+                ResultSet rs = ps.executeQuery();
+                searchResultTable.setModel(DbUtils.resultSetToTableModel(rs));
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(AgentDashboard.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_searchBtnActionPerformed
+
+    private void showProfile(MouseEvent evt) {//GEN-FIRST:event_showProfile
+        int row = searchResultTable.getSelectedRow();
+        String ssn_str = searchResultTable.getModel().getValueAt(row, 0).toString();
+        int ssn = Integer.parseInt(ssn_str);
+        try {
+            PreparedStatement ps = DBController.getPreparedStmt("SELECT * FROM User WHERE SSN=?");
+            ps.setInt(1, ssn);
+            
+            ResultSet rs = ps.executeQuery();
+            User current = User.fromResultSet(rs);
+            
+            if (current != null) {
+                new UserProfileDialog(this, currentAgent, current).setVisible(true);
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(AgentDashboard.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }//GEN-LAST:event_showProfile
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        new AddTravelDialog(this, true).setVisible(true);
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        FlatDarculaLaf.setup();  
+        FlatDarculaLaf.setup();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private JButton addBtn;
-    private JButton deleteBtn;
-    private JButton editBtn;
     private JButton jButton1;
     private JButton jButton2;
     private JButton jButton3;
-    private JComboBox<String> jComboBox1;
     private JLabel jLabel1;
     private JLabel jLabel5;
     private JPanel jPanel1;
     private JPanel jPanel2;
     private JPanel jPanel3;
     private JPanel jPanel5;
-    private JPanel jPanel6;
     private JScrollPane jScrollPane1;
     private JTabbedPane jTabbedPane1;
-    private JTable jTable1;
-    private JTextField jTextField1;
+    private JTextField keyword;
     private JLabel nameDisplay;
     private JButton searchBtn;
+    private JComboBox<String> searchColumn;
+    private JTable searchResultTable;
     private JPanel travelTab;
     private JScrollPane userListTable;
     private JPanel userTab;
-    private JButton viewProfileBtn;
     // End of variables declaration//GEN-END:variables
 }

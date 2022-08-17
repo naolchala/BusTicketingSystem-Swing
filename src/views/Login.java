@@ -4,26 +4,19 @@
  */
 package views;
 
-import Controllers.DBController;
 import Exceptions.InvalidFormException;
 import Models.Admin;
 import Models.Agent;
+import Models.Passenger;
 import Models.Roles;
 import Models.User;
 import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatIntelliJLaf;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -35,7 +28,6 @@ import javax.swing.LayoutStyle;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
-import java.sql.*;
 /**
  *
  * @author naol
@@ -232,13 +224,19 @@ public class Login extends javax.swing.JFrame {
             User current = User.login(ssn, pass);
             
             if (current.Role == Roles.AGENT) {
-                Agent currentAgent = Agent.fromUser(current);
+                Agent currentAgent = new Agent(current);
                 this.dispose();
                 new AgentDashboard(currentAgent).setVisible(true);
             } else if (current.Role == Roles.ADMIN) {
                 this.dispose();
-                new AdminDashboard(Admin.fromUser(current)).setVisible(true);
+                Admin a = new Admin(current);
+                new AdminDashboard(a).setVisible(true);
+            } else if (current.Role == Roles.PASSENGER) {
+                this.dispose();
+                Passenger p = new Passenger(current);
+                new PassengerDashboard(p).setVisible(true);
             }
+  
             
         }catch(InvalidFormException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error in Form", JOptionPane.ERROR_MESSAGE);

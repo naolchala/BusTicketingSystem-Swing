@@ -12,14 +12,12 @@ public class Agent extends User {
     Agent() {
 
     }
-    public static Agent fromUser(User u) {
-        Agent agent = new Agent();
-        agent.FirstName = u.FirstName;
-        agent.LastName = u.LastName;
-        agent.BankAccountNo = u.BankAccountNo;
-        agent.PhoneNumber = u.PhoneNumber;
-        agent.Role = u.Role;
-        agent.SSN = u.SSN;
-        return agent;
+    public Agent(User u) {
+        this.FirstName = u.FirstName;
+        this.LastName = u.LastName;
+        this.BankAccountNo = u.BankAccountNo;
+        this.PhoneNumber = u.PhoneNumber;
+        this.Role = u.Role;
+        this.SSN = u.SSN;
     }
 }

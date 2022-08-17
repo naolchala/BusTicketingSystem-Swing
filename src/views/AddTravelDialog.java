@@ -5,11 +5,16 @@
 package views;
 
 import Controllers.DBController;
+import Exceptions.InvalidFormException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import net.proteanit.sql.DbUtils;
 
 /**
@@ -53,6 +58,7 @@ public class AddTravelDialog extends javax.swing.JDialog {
         dateTimeField = new javax.swing.JSpinner();
         cancelBtn = new javax.swing.JButton();
         saveBtn = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -136,6 +142,8 @@ public class AddTravelDialog extends javax.swing.JDialog {
             }
         });
 
+        jLabel7.setText("ETB");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -147,14 +155,16 @@ public class AddTravelDialog extends javax.swing.JDialog {
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 353, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(pricefield)
-                                .addComponent(jLabel6)
-                                .addComponent(dateTimeField, javax.swing.GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE))
+                            .addComponent(jLabel6)
+                            .addComponent(dateTimeField, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(cancelBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(saveBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(saveBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(pricefield, javax.swing.GroupLayout.PREFERRED_SIZE, 295, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel7))))
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 542, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -195,7 +205,9 @@ public class AddTravelDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 196, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(pricefield, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(pricefield, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel7))
                         .addGap(18, 18, 18)
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -222,7 +234,58 @@ public class AddTravelDialog extends javax.swing.JDialog {
 
     private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
         // TODO add your handling code here:
-        
+        try {
+            int row = sourceCity.getSelectedRow();
+            if (row == -1) {
+                throw new InvalidFormException("Please Select Source City");
+            }
+            int sourceCityID = Integer.parseInt(sourceCity.getModel().getValueAt(row, 0).toString());
+
+            row = distCity.getSelectedRow();
+            if (row == -1) {
+                throw new InvalidFormException("Please Select Destination City");
+            }
+            int distCityID = Integer.parseInt(distCity.getModel().getValueAt(row, 0).toString());
+
+            row = busTable.getSelectedRow();
+            if (row == -1) {
+                throw new InvalidFormException("Please Select Bus");
+            }
+            int plateNumber = Integer.parseInt(busTable.getModel().getValueAt(row, 0).toString());
+
+            if (pricefield.getText().equals("")) {
+                throw new InvalidFormException("Please Enter the Price");
+            }
+            int price = Integer.parseInt(pricefield.getText());
+
+            if (price < 0) {
+                throw new InvalidFormException("Please Enter Valid Price");
+            }
+
+            Date datet = (Date) dateTimeField.getValue();
+            SimpleDateFormat dt = new SimpleDateFormat("dd/MM/y");
+            SimpleDateFormat tt = new SimpleDateFormat("HH:mm");
+            
+            PreparedStatement ps = DBController.getPreparedStmt("INSERT INTO Travel(TravelID, BusPlateNumber, SourceCityID, DestinationCityID, Price, StartTime, StartDate, ArrivedTime, ArrivedDate) VALUES (NULL, ?, ?, ?, ?, ?, ?, NULL, NULL)");
+            ps.setInt(1, plateNumber);
+            ps.setInt(2, sourceCityID);
+            ps.setInt(3, distCityID);
+            ps.setInt(4, price);
+            ps.setTime(5, new Time(datet.getTime()));
+            ps.setDate(6, new java.sql.Date(datet.getTime()));
+            
+            ps.executeUpdate();
+            
+            JOptionPane.showMessageDialog(this, "Travel Added Successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            this.dispose();
+            
+        } catch (InvalidFormException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error in Form", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException ex) {
+            Logger.getLogger(AddTravelDialog.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
     }//GEN-LAST:event_saveBtnActionPerformed
 
     private void loadSourceCities() {
@@ -317,6 +380,7 @@ public class AddTravelDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;

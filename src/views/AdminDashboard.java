@@ -74,6 +74,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         jPanel2 = new JPanel();
         nameDisplay = new JLabel();
         jLabel5 = new JLabel();
+        jButton9 = new JButton();
         jPanel3 = new JPanel();
         jTabbedPane1 = new JTabbedPane();
         userTab = new JPanel();
@@ -86,9 +87,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         searchResultTable = new JTable();
         addUserBtn = new JButton();
         travelTab = new JPanel();
-        jButton1 = new JButton();
         jButton2 = new JButton();
-        jButton3 = new JButton();
         jPanel4 = new JPanel();
         jScrollPane2 = new JScrollPane();
         busTable = new JTable();
@@ -138,6 +137,13 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jButton9.setText("Logout");
+        jButton9.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                jButton9ActionPerformed(evt);
+            }
+        });
+
         GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -145,6 +151,8 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addGap(32, 32, 32)
                 .addComponent(jLabel1)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton9)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addGap(25, 25, 25))
         );
@@ -156,7 +164,9 @@ public class AdminDashboard extends javax.swing.JFrame {
                         .addComponent(jPanel2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(23, 23, 23)
-                        .addComponent(jLabel1)))
+                        .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(jButton9))))
                 .addContainerGap())
         );
 
@@ -244,33 +254,26 @@ public class AdminDashboard extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Manage Users", userTab);
 
-        jButton1.setText("Search Travels");
-        jButton1.setActionCommand("");
-
         jButton2.setText("Add Travel");
-
-        jButton3.setText("View Recent Travel Histories");
+        jButton2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         GroupLayout travelTabLayout = new GroupLayout(travelTab);
         travelTab.setLayout(travelTabLayout);
         travelTabLayout.setHorizontalGroup(travelTabLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(travelTabLayout.createSequentialGroup()
                 .addGap(114, 114, 114)
-                .addGroup(travelTabLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton2, GroupLayout.PREFERRED_SIZE, 506, GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, GroupLayout.PREFERRED_SIZE, 506, GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton3, GroupLayout.PREFERRED_SIZE, 506, GroupLayout.PREFERRED_SIZE))
+                .addComponent(jButton2, GroupLayout.PREFERRED_SIZE, 506, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(157, Short.MAX_VALUE))
         );
         travelTabLayout.setVerticalGroup(travelTabLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(travelTabLayout.createSequentialGroup()
                 .addGap(51, 51, 51)
                 .addComponent(jButton2, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jButton1, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jButton3, GroupLayout.PREFERRED_SIZE, 49, GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(332, Short.MAX_VALUE))
+                .addContainerGap(461, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Manage Travels", travelTab);
@@ -540,6 +543,17 @@ public class AdminDashboard extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton7ActionPerformed
 
+    private void jButton9ActionPerformed(ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+        new Login().setVisible(true);
+    }//GEN-LAST:event_jButton9ActionPerformed
+
+    private void jButton2ActionPerformed(ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        new AddTravelDialog(this, true).setVisible(true);
+    }//GEN-LAST:event_jButton2ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -551,14 +565,13 @@ public class AdminDashboard extends javax.swing.JFrame {
     private JButton addUserBtn;
     private JTable busTable;
     private JTable cityTable;
-    private JButton jButton1;
     private JButton jButton2;
-    private JButton jButton3;
     private JButton jButton4;
     private JButton jButton5;
     private JButton jButton6;
     private JButton jButton7;
     private JButton jButton8;
+    private JButton jButton9;
     private JComboBox<String> jComboBox1;
     private JComboBox<String> jComboBox2;
     private JLabel jLabel1;

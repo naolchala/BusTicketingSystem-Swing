@@ -8,11 +8,11 @@ package Models;
  *
  * @author naol
  */
-public class Admin extends User {
-    public Admin() {
-        
+public class Passenger extends User {
+    Passenger() {
+
     }
-    public Admin(User u) {
+    public Passenger(User u) {
         this.FirstName = u.FirstName;
         this.LastName = u.LastName;
         this.BankAccountNo = u.BankAccountNo;
@@ -20,5 +20,4 @@ public class Admin extends User {
         this.Role = u.Role;
         this.SSN = u.SSN;
     }
-    
 }
